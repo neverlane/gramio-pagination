@@ -3,6 +3,7 @@ import { InlineKeyboard } from "@gramio/keyboards";
 import type {
 	PaginationDataFunction,
 	PaginationItemFunction,
+	PaginationOnSelectFunction,
 } from "./types.ts";
 
 export class Pagination<Data> {
@@ -11,6 +12,7 @@ export class Pagination<Data> {
 	private limitValue = 10;
 	private columnsValue: number | undefined;
 	private itemDataIterator: PaginationItemFunction<Data> | undefined;
+	private onSelectCallback: PaginationOnSelectFunction<Data> | undefined;
 
 	private callbackData: CallbackData<
 		{
@@ -49,6 +51,12 @@ export class Pagination<Data> {
 		return this;
 	}
 
+	onSelect(callback: PaginationOnSelectFunction<Data>) {
+		this.onSelectCallback = callback;
+
+		return this;
+	}
+
 	async getKeyboard(offset: number) {
 		const data = await this.getData({ offset, limit: this.limitValue + 1 });
 
@@ -57,7 +65,7 @@ export class Pagination<Data> {
 		})
 			.columns(this.columnsValue)
 			.add(
-				...data.map((x) => {
+				...data.slice(0, this.limitValue).map((x) => {
 					const item = this.itemDataIterator?.(x);
 
 					return InlineKeyboard.text(

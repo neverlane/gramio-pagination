@@ -19,7 +19,14 @@ export function paginationFor(paginationList: Pagination<any>[]) {
 			// biome-ignore lint/complexity/useLiteralKeys: <explanation>
 			const data = pagination["callbackData"].unpack(context.data);
 
-			if (data.type === "select") return;
+			console.log(data);
+
+			if (data.type === "select")
+				return pagination["onSelectCallback"]?.({
+					id: data.offset,
+					// @ts-expect-error
+					context,
+				});
 
 			const keyboard = await pagination.getKeyboard(data.offset);
 

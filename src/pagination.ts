@@ -8,7 +8,16 @@ export class Pagination<Data> {
 	private limitValue = 10;
 	private columnsValue: number | undefined;
 
-	private callbackData: CallbackData;
+	private callbackData: CallbackData<
+		{
+			type: "select" | "set";
+			offset: number;
+		},
+		{
+			type: "select" | "set";
+			offset: number;
+		}
+	>;
 
 	constructor(name: string, func: PaginationDataFunction<Data>) {
 		this.name = name;

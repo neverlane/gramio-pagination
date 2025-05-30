@@ -7,23 +7,21 @@ export function paginationFor(paginationList: Pagination<any>[]) {
 	return new Plugin("@gramio/pagination").on(
 		"callback_query",
 		async (context, next) => {
-			const match = context.data.match(REGEX);
-
-			if (!match) {
-				return next();
-			}
-
-			const [, name, offset] = match;
-
-			// biome-ignore lint/complexity/useLiteralKeys: <explanation>
-			const pagination = paginationList.find((p) => p["name"] === name);
+			const pagination = paginationList.find((p) =>
+				// biome-ignore lint/complexity/useLiteralKeys: <explanation>
+				p["callbackData"].filter(context.data),
+			);
 
 			if (!pagination) {
 				return next();
 			}
 
-			console.log(context.data);
-			const keyboard = await pagination.getKeyboard(Number(offset));
+			// biome-ignore lint/complexity/useLiteralKeys: <explanation>
+			const data = pagination["callbackData"].unpack(context.data);
+
+			if (data.type === "select") return;
+
+			const keyboard = await pagination.getKeyboard(data.offset);
 
 			await context.editReplyMarkup(keyboard);
 		},

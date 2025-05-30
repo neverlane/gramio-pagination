@@ -18,14 +18,15 @@ export class Pagination<Data> {
 	private onSelectCallback: PaginationOnSelectFunction<Data> | undefined;
 	private getCount: PaginationGetCountFunction | undefined;
 	private pageInfoFormat: ((data: PaginationPageInfo) => string) | undefined;
+	private firstLastPage = false;
 
 	private callbackData: CallbackData<
 		{
-			type: "select" | "set";
+			type: "select" | "set" | "set_page";
 			offset: number;
 		},
 		{
-			type: "select" | "set";
+			type: "select" | "set" | "set_page";
 			offset: number;
 		}
 	>;
@@ -34,7 +35,7 @@ export class Pagination<Data> {
 		this.name = name;
 		this.getData = func;
 		this.callbackData = new CallbackData(name)
-			.enum("type", ["set", "select"])
+			.enum("type", ["set", "select", "set_page"])
 			.number("offset");
 	}
 
@@ -74,12 +75,18 @@ export class Pagination<Data> {
 		return this;
 	}
 
+	withFirstLastPage() {
+		this.firstLastPage = true;
+
+		return this;
+	}
+
 	async getDataWithPaginationInfo(offset: number) {
 		if (!this.getCount) {
 			const data = await this.getData({ offset, limit: this.limitValue + 1 });
 
 			return {
-				data,
+				data: data.slice(0, this.limitValue),
 				pagination: {
 					hasNext: data.length > this.limitValue,
 					hasPrevious: offset > 0,
@@ -106,6 +113,8 @@ export class Pagination<Data> {
 			pagination,
 			"totalPages" in pagination,
 			!!this.pageInfoFormat,
+			this.firstLastPage,
+			pagination.hasPrevious,
 		);
 
 		return new InlineKeyboard({
@@ -113,7 +122,7 @@ export class Pagination<Data> {
 		})
 			.columns(this.columnsValue)
 			.add(
-				...data.slice(0, this.limitValue).map((x) => {
+				...data.map((x) => {
 					const item = this.itemDataIterator?.(x);
 
 					return InlineKeyboard.text(
@@ -129,6 +138,16 @@ export class Pagination<Data> {
 			)
 			.row()
 			.columns(undefined)
+			.addIf(
+				this.firstLastPage && pagination.hasPrevious,
+				InlineKeyboard.text(
+					"⏮️",
+					this.callbackData.pack({
+						type: "set_page",
+						offset: 0,
+					}),
+				),
+			)
 			.addIf(
 				pagination.hasPrevious,
 				InlineKeyboard.text(
@@ -154,6 +173,16 @@ export class Pagination<Data> {
 					this.callbackData.pack({
 						type: "set",
 						offset: offset + this.limitValue,
+					}),
+				),
+			)
+			.addIf(
+				this.firstLastPage && "totalPages" in pagination && pagination.hasNext,
+				InlineKeyboard.text(
+					"⏭️",
+					this.callbackData.pack({
+						type: "set_page",
+						offset: (pagination as PaginationPageInfo).totalPages - 1,
 					}),
 				),
 			);

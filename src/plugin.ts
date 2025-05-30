@@ -21,6 +21,8 @@ export function paginationFor(paginationList: Pagination<any>[]) {
 
 			console.log(data);
 
+			let offset = data.offset;
+
 			if (data.type === "select")
 				return pagination["onSelectCallback"]?.({
 					id: data.offset,
@@ -28,7 +30,11 @@ export function paginationFor(paginationList: Pagination<any>[]) {
 					context,
 				});
 
-			const keyboard = await pagination.getKeyboard(data.offset);
+			if (data.type === "set_page") {
+				offset = data.offset > 0 ? pagination["limitValue"] * data.offset : 0;
+			}
+
+			const keyboard = await pagination.getKeyboard(offset);
 
 			await context.editReplyMarkup(keyboard);
 		},

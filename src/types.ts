@@ -5,4 +5,4 @@ export interface PaginationDataInput {
 
 export type PaginationDataFunction<Data> = (
 	input: PaginationDataInput,
-) => Promise<Data>;
+) => Promise<Data[]>;

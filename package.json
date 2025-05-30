@@ -35,11 +35,21 @@
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
 		"@types/bun": "^1.2.8",
+		"gramio": "^0.4.7",
 		"pkgroll": "^2.11.2",
 		"typescript": "^5.8.2"
 	},
 	"dependencies": {
+		"@gramio/callback-data": "^0.0.8",
 		"@gramio/keyboards": "^1.2.1",
 		"@gramio/types": "^9.0.1"
+	},
+	"peerDependencies": {
+		"gramio": "^0.4.7"
+	},
+	"peerDependenciesMeta": {
+		"gramio": {
+			"optional": true
+		}
 	}
 }

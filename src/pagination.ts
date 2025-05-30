@@ -5,6 +5,7 @@ import type {
 	PaginationGetCountFunction,
 	PaginationItemFunction,
 	PaginationOnSelectFunction,
+	PaginationPageInfo,
 } from "./types.ts";
 import { calculatePagination } from "./utils.ts";
 
@@ -16,6 +17,7 @@ export class Pagination<Data> {
 	private itemDataIterator: PaginationItemFunction<Data> | undefined;
 	private onSelectCallback: PaginationOnSelectFunction<Data> | undefined;
 	private getCount: PaginationGetCountFunction | undefined;
+	private pageInfoFormat: ((data: PaginationPageInfo) => string) | undefined;
 
 	private callbackData: CallbackData<
 		{
@@ -66,6 +68,12 @@ export class Pagination<Data> {
 		return this;
 	}
 
+	withPageInfo(format: (data: PaginationPageInfo) => string) {
+		this.pageInfoFormat = format;
+
+		return this;
+	}
+
 	async getDataWithPaginationInfo(offset: number) {
 		if (!this.getCount) {
 			const data = await this.getData({ offset, limit: this.limitValue + 1 });
@@ -93,6 +101,13 @@ export class Pagination<Data> {
 	async getKeyboard(offset: number) {
 		const { data, pagination } = await this.getDataWithPaginationInfo(offset);
 
+		console.log(
+			data,
+			pagination,
+			"totalPages" in pagination,
+			!!this.pageInfoFormat,
+		);
+
 		return new InlineKeyboard({
 			enableSetterKeyboardHelpers: true,
 		})
@@ -113,8 +128,9 @@ export class Pagination<Data> {
 				}),
 			)
 			.row()
+			.columns(undefined)
 			.addIf(
-				offset !== 0,
+				pagination.hasPrevious,
 				InlineKeyboard.text(
 					"⬅️",
 					this.callbackData.pack({
@@ -123,9 +139,16 @@ export class Pagination<Data> {
 					}),
 				),
 			)
-
 			.addIf(
-				data.length > this.limitValue,
+				"totalPages" in pagination && !!this.pageInfoFormat,
+				InlineKeyboard.text(
+					// biome-ignore lint/style/noNonNullAssertion: <explanation>
+					this.pageInfoFormat!(pagination as PaginationPageInfo),
+					"$noop$",
+				),
+			)
+			.addIf(
+				pagination.hasNext,
 				InlineKeyboard.text(
 					"➡️",
 					this.callbackData.pack({

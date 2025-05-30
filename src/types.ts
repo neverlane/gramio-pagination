@@ -26,3 +26,8 @@ export type PaginationOnSelectFunction<Data> = (
 ) => void;
 
 export type PaginationGetCountFunction = () => Promise<number>;
+
+export interface PaginationPageInfo {
+	totalPages: number;
+	currentPage: number;
+}

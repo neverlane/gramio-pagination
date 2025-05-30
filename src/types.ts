@@ -24,3 +24,5 @@ export interface PaginationOnSelectInput {
 export type PaginationOnSelectFunction<Data> = (
 	data: PaginationOnSelectInput,
 ) => void;
+
+export type PaginationGetCountFunction = () => Promise<number>;

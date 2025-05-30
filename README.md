@@ -7,6 +7,8 @@
 
 # Usage
 
+![image](https://raw.githubusercontent.com/gramiojs/pagination/refs/heads/main/assets/example.png)
+
 ```ts
 const data = [
     {
@@ -65,4 +67,5 @@ const bot = new Bot(process.env.BOT_TOKEN as string)
 await bot.start();
 ```
 
-![image](./assets/image.png)
+> [!WARNING]
+> This is a work in progress and the API is subject to change.

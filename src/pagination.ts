@@ -105,17 +105,8 @@ export class Pagination<Data> {
 		};
 	}
 
-	async getKeyboard(offset: number) {
+	async getKeyboard(offset = 0) {
 		const { data, pagination } = await this.getDataWithPaginationInfo(offset);
-
-		console.log(
-			data,
-			pagination,
-			"totalPages" in pagination,
-			!!this.pageInfoFormat,
-			this.firstLastPage,
-			pagination.hasPrevious,
-		);
 
 		return new InlineKeyboard({
 			enableSetterKeyboardHelpers: true,

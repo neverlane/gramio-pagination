@@ -1,8 +1,19 @@
 {
 	"name": "@gramio/pagination",
 	"version": "0.0.1",
-	"description": "server-side pagination",
-	"keywords": ["gramio", "telegram", "pagination", "tma", "webapp"],
+	"description": "Pagination library for telegram bots",
+	"keywords": [
+		"gramio",
+		"telegram",
+		"pagination",
+		"tma",
+		"bot",
+		"telegram-pagination",
+		"paginator",
+		"menu",
+		"telegram-menu",
+		"bot-menu"
+	],
 	"homepage": "https://github.com/gramiojs/pagination",
 	"readme": "https://github.com/gramiojs/pagination",
 	"repository": {

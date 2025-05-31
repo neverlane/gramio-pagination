@@ -1,8 +1,6 @@
 import { Plugin } from "gramio";
 import type { Pagination } from "./pagination.ts";
 
-const REGEX = /pagination:(.*):(.*)/;
-
 export function paginationFor(paginationList: Pagination<any>[]) {
 	return new Plugin("@gramio/pagination").on(
 		"callback_query",

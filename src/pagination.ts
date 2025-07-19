@@ -24,10 +24,12 @@ export class Pagination<Data> {
 		{
 			type: "select" | "set" | "set_page";
 			offset: number;
+			payload?: string;
 		},
 		{
 			type: "select" | "set" | "set_page";
 			offset: number;
+			payload?: string;
 		}
 	>;
 
@@ -36,7 +38,10 @@ export class Pagination<Data> {
 		this.getData = func;
 		this.callbackData = new CallbackData(name)
 			.enum("type", ["set", "select", "set_page"])
-			.number("offset");
+			.number("offset")
+			.string("payload", {
+				optional: true,
+			});
 	}
 
 	limit(count: number) {
@@ -81,9 +86,9 @@ export class Pagination<Data> {
 		return this;
 	}
 
-	async getDataWithPaginationInfo(offset: number) {
+	async getDataWithPaginationInfo(offset: number, payload?: string) {
 		if (!this.getCount) {
-			const data = await this.getData({ offset, limit: this.limitValue + 1 });
+			const data = await this.getData({ offset, limit: this.limitValue + 1, payload });
 
 			return {
 				data: data.slice(0, this.limitValue),
@@ -105,8 +110,8 @@ export class Pagination<Data> {
 		};
 	}
 
-	async getKeyboard(offset = 0) {
-		const { data, pagination } = await this.getDataWithPaginationInfo(offset);
+	async getKeyboard(offset = 0, payload?: string) {
+		const { data, pagination } = await this.getDataWithPaginationInfo(offset, payload);
 
 		return new InlineKeyboard({
 			enableSetterKeyboardHelpers: true,
@@ -123,6 +128,7 @@ export class Pagination<Data> {
 							type: "select",
 							// @ts-expect-error
 							offset: item?.id ?? x.id,
+							payload,
 						}),
 					);
 				}),
@@ -136,6 +142,7 @@ export class Pagination<Data> {
 					this.callbackData.pack({
 						type: "set_page",
 						offset: 0,
+						payload,
 					}),
 				),
 			)
@@ -146,6 +153,7 @@ export class Pagination<Data> {
 					this.callbackData.pack({
 						type: "set",
 						offset: offset - this.limitValue,
+						payload,
 					}),
 				),
 			)
@@ -164,6 +172,7 @@ export class Pagination<Data> {
 					this.callbackData.pack({
 						type: "set",
 						offset: offset + this.limitValue,
+						payload,
 					}),
 				),
 			)
@@ -174,6 +183,7 @@ export class Pagination<Data> {
 					this.callbackData.pack({
 						type: "set_page",
 						offset: (pagination as PaginationPageInfo).totalPages - 1,
+						payload,
 					}),
 				),
 			);

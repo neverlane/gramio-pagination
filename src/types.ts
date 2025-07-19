@@ -3,6 +3,7 @@ import type { Bot, ContextType } from "gramio";
 export interface PaginationDataInput {
 	offset: number;
 	limit: number;
+	payload?: string;
 }
 
 export type PaginationDataFunction<Data> = (
@@ -18,6 +19,7 @@ export type PaginationItemFunction<Data> = (data: Data) => PaginationItemOutput;
 
 export interface PaginationOnSelectInput {
 	id: string | number;
+	payload?: string;
 	context: ContextType<Bot, "callback_query">;
 }
 

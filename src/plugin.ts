@@ -17,13 +17,12 @@ export function paginationFor(paginationList: Pagination<any>[]) {
 			// biome-ignore lint/complexity/useLiteralKeys: <explanation>
 			const data = pagination["callbackData"].unpack(context.data);
 
-			console.log(data);
-
 			let offset = data.offset;
 
 			if (data.type === "select")
 				return pagination["onSelectCallback"]?.({
 					id: data.offset,
+					payload: data.payload,
 					// @ts-expect-error
 					context,
 				});
@@ -32,7 +31,7 @@ export function paginationFor(paginationList: Pagination<any>[]) {
 				offset = data.offset > 0 ? pagination["limitValue"] * data.offset : 0;
 			}
 
-			const keyboard = await pagination.getKeyboard(offset);
+			const keyboard = await pagination.getKeyboard(offset, data.payload);
 
 			await context.editReplyMarkup(keyboard);
 		},

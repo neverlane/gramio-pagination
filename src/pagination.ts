@@ -20,6 +20,10 @@ export class Pagination<Data> {
 	private pageInfoFormat: ((data: PaginationPageInfo) => string) | undefined;
 	private firstLastPage = false;
 
+	private wrapKeyboardHandler:
+		| ((keyboard: InlineKeyboard) => InlineKeyboard)
+		| undefined;
+
 	private callbackData: CallbackData<
 		{
 			type: "select" | "set" | "set_page";
@@ -37,6 +41,12 @@ export class Pagination<Data> {
 		this.callbackData = new CallbackData(name)
 			.enum("type", ["set", "select", "set_page"])
 			.number("offset");
+	}
+
+	wrapKeyboard(func: (keyboard: InlineKeyboard) => InlineKeyboard) {
+		this.wrapKeyboardHandler = func;
+
+		return this;
 	}
 
 	limit(count: number) {
@@ -108,7 +118,7 @@ export class Pagination<Data> {
 	async getKeyboard(offset = 0) {
 		const { data, pagination } = await this.getDataWithPaginationInfo(offset);
 
-		return new InlineKeyboard({
+		const keyboard = new InlineKeyboard({
 			enableSetterKeyboardHelpers: true,
 		})
 			.columns(this.columnsValue)
@@ -177,5 +187,7 @@ export class Pagination<Data> {
 					}),
 				),
 			);
+
+		return this.wrapKeyboardHandler?.(keyboard) ?? keyboard;
 	}
 }

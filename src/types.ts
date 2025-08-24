@@ -1,13 +1,20 @@
+import type { CallbackData, InferDataUnpack } from "@gramio/callback-data";
 import type { Bot, ContextType } from "gramio";
 
-export interface PaginationDataInput {
+export interface PaginationDataInput<
+	Payload extends CallbackData<any, any> | never = never,
+> {
 	offset: number;
 	limit: number;
+	payload: Payload extends CallbackData<any, any>
+		? InferDataUnpack<Payload>
+		: undefined;
 }
 
-export type PaginationDataFunction<Data> = (
-	input: PaginationDataInput,
-) => Promise<Data[]>;
+export type PaginationDataFunction<
+	Data,
+	Payload extends CallbackData<any, any> | never = never,
+> = (input: PaginationDataInput<Payload>) => Promise<Data[]>;
 
 export interface PaginationItemOutput {
 	title: string;
@@ -16,14 +23,20 @@ export interface PaginationItemOutput {
 
 export type PaginationItemFunction<Data> = (data: Data) => PaginationItemOutput;
 
-export interface PaginationOnSelectInput {
+export interface PaginationOnSelectInput<
+	Payload extends CallbackData<any, any> | never = never,
+> {
 	id: string | number;
 	context: ContextType<Bot, "callback_query">;
+	payload: Payload extends CallbackData<any, any>
+		? InferDataUnpack<Payload>
+		: undefined;
 }
 
-export type PaginationOnSelectFunction<Data> = (
-	data: PaginationOnSelectInput,
-) => void;
+export type PaginationOnSelectFunction<
+	Data,
+	Payload extends CallbackData<any, any> | never = never,
+> = (data: PaginationOnSelectInput<Payload>) => void;
 
 export type PaginationGetCountFunction = () => Promise<number>;
 
@@ -31,3 +44,5 @@ export interface PaginationPageInfo {
 	totalPages: number;
 	currentPage: number;
 }
+
+export type IsNever<T> = [T] extends [never] ? true : false;

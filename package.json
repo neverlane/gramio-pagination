@@ -1,6 +1,6 @@
 {
 	"name": "@gramio/pagination",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"description": "Pagination library for telegram bots",
 	"keywords": [
 		"gramio",
@@ -63,7 +63,7 @@
 		"typescript": "^5.8.2"
 	},
 	"dependencies": {
-		"@gramio/callback-data": "^0.0.8",
+		"@gramio/callback-data": "^0.0.11",
 		"@gramio/keyboards": "^1.2.1",
 		"@gramio/types": "^9.0.1"
 	},

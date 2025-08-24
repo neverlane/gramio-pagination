@@ -7,6 +7,17 @@
 
 # Usage
 
+> [!WARNING]
+> This package requires `@gramio/callback-data` to be installed with specific version so please override it in your `package.json`.
+
+```json
+{
+    "overrides": {
+        "@gramio/callback-data": "^0.0.11"
+    }
+}
+```
+
 ![image](https://raw.githubusercontent.com/gramiojs/pagination/refs/heads/main/assets/example.png)
 
 ```ts

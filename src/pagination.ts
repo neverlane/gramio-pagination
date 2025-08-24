@@ -1,6 +1,11 @@
-import { CallbackData } from "@gramio/callback-data";
+import {
+	CallbackData,
+	type InferDataPack,
+	type InferDataUnpack,
+} from "@gramio/callback-data";
 import { InlineKeyboard } from "@gramio/keyboards";
 import type {
+	IsNever,
 	PaginationDataFunction,
 	PaginationGetCountFunction,
 	PaginationItemFunction,
@@ -9,13 +14,20 @@ import type {
 } from "./types.ts";
 import { calculatePagination } from "./utils.ts";
 
-export class Pagination<Data> {
+export type AnyPagination = Pagination<any, any>;
+
+export class Pagination<
+	Data,
+	Payload extends CallbackData<any, any> | never = never,
+> {
 	private name: string;
-	private getData: PaginationDataFunction<Data>;
+	private getData: PaginationDataFunction<Data, Payload>;
 	private limitValue = 10;
 	private columnsValue: number | undefined;
 	private itemDataIterator: PaginationItemFunction<Data> | undefined;
-	private onSelectCallback: PaginationOnSelectFunction<Data> | undefined;
+	private onSelectCallback:
+		| PaginationOnSelectFunction<Data, Payload>
+		| undefined;
 	private getCount: PaginationGetCountFunction | undefined;
 	private pageInfoFormat: ((data: PaginationPageInfo) => string) | undefined;
 	private firstLastPage = false;
@@ -28,19 +40,53 @@ export class Pagination<Data> {
 		{
 			type: "select" | "set" | "set_page";
 			offset: number;
+			payload?: InferDataUnpack<Payload>;
 		},
 		{
 			type: "select" | "set" | "set_page";
 			offset: number;
+			payload?: InferDataUnpack<Payload>;
 		}
 	>;
 
-	constructor(name: string, func: PaginationDataFunction<Data>) {
+	private payloadInstance: Payload | undefined;
+
+	constructor(name: string, func: PaginationDataFunction<Data, Payload>);
+	constructor(
+		name: string,
+		payload: Payload,
+		func: PaginationDataFunction<Data, Payload>,
+	);
+	constructor(
+		name: string,
+		funcOrCallbackData: PaginationDataFunction<Data, Payload> | Payload,
+		func?: PaginationDataFunction<Data, Payload>,
+	) {
 		this.name = name;
-		this.getData = func;
+		this.getData =
+			funcOrCallbackData instanceof CallbackData ? func! : funcOrCallbackData!;
+
+		this.payloadInstance =
+			funcOrCallbackData instanceof CallbackData
+				? funcOrCallbackData
+				: undefined;
+
+		const payloadCallbackData =
+			this.payloadInstance ?? new CallbackData("noop");
+
 		this.callbackData = new CallbackData(name)
 			.enum("type", ["set", "select", "set_page"])
-			.number("offset");
+			.number("offset")
+			.data("payload", payloadCallbackData, {
+				optional: true,
+			});
+	}
+
+	payload<T extends CallbackData<any, any>>(payload: T): Pagination<Data, T> {
+		// @ts-expect-error
+		this.payloadInstance = payload;
+
+		return this as any;
 	}
 
 	wrapKeyboard(func: (keyboard: InlineKeyboard) => InlineKeyboard) {
@@ -73,7 +119,7 @@ export class Pagination<Data> {
 		return this;
 	}
 
-	onSelect(callback: PaginationOnSelectFunction<Data>) {
+	onSelect(callback: PaginationOnSelectFunction<Data, Payload>) {
 		this.onSelectCallback = callback;
 
 		return this;
@@ -91,9 +137,18 @@ export class Pagination<Data> {
 		return this;
 	}
 
-	async getDataWithPaginationInfo(offset: number) {
+	async getDataWithPaginationInfo(
+		offset: number,
+		...args: IsNever<Payload> extends true
+			? []
+			: [payload: InferDataUnpack<Payload>]
+	) {
 		if (!this.getCount) {
-			const data = await this.getData({ offset, limit: this.limitValue + 1 });
+			const data = await this.getData({
+				offset,
+				limit: this.limitValue + 1,
+				payload: args[0] as never,
+			});
 
 			return {
 				data: data.slice(0, this.limitValue),
@@ -106,7 +161,11 @@ export class Pagination<Data> {
 
 		const [count, data] = await Promise.all([
 			this.getCount(),
-			this.getData({ offset, limit: this.limitValue }),
+			this.getData({
+				offset,
+				limit: this.limitValue,
+				payload: args[0] as never,
+			}),
 		]);
 
 		return {
@@ -115,8 +174,16 @@ export class Pagination<Data> {
 		};
 	}
 
-	async getKeyboard(offset = 0) {
-		const { data, pagination } = await this.getDataWithPaginationInfo(offset);
+	async getKeyboard(
+		offset = 0,
+		...args: IsNever<Payload> extends true
+			? []
+			: [payload: InferDataUnpack<Payload>]
+	) {
+		const { data, pagination } = await this.getDataWithPaginationInfo(
+			offset,
+			...args,
+		);
 
 		const keyboard = new InlineKeyboard({
 			enableSetterKeyboardHelpers: true,
@@ -133,6 +200,7 @@ export class Pagination<Data> {
 							type: "select",
 							// @ts-expect-error
 							offset: item?.id ?? x.id,
+							payload: args[0] as never,
 						}),
 					);
 				}),
@@ -146,6 +214,7 @@ export class Pagination<Data> {
 					this.callbackData.pack({
 						type: "set_page",
 						offset: 0,
+						payload: args[0] as never,
 					}),
 				),
 			)
@@ -156,6 +225,7 @@ export class Pagination<Data> {
 					this.callbackData.pack({
 						type: "set",
 						offset: offset - this.limitValue,
+						payload: args[0] as never,
 					}),
 				),
 			)
@@ -174,6 +244,7 @@ export class Pagination<Data> {
 					this.callbackData.pack({
 						type: "set",
 						offset: offset + this.limitValue,
+						payload: args[0] as never,
 					}),
 				),
 			)
@@ -184,6 +255,7 @@ export class Pagination<Data> {
 					this.callbackData.pack({
 						type: "set_page",
 						offset: (pagination as PaginationPageInfo).totalPages - 1,
+						payload: args[0] as never,
 					}),
 				),
 			);

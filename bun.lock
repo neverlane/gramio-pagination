@@ -4,7 +4,7 @@
     "": {
       "name": "@gramio/init-data",
       "dependencies": {
-        "@gramio/callback-data": "^0.0.8",
+        "@gramio/callback-data": "^0.0.11",
         "@gramio/keyboards": "^1.2.1",
         "@gramio/types": "^9.0.1",
       },
@@ -92,7 +92,7 @@
 
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.24.2", "", { "os": "win32", "cpu": "x64" }, "sha512-7VTgWzgMGvup6aSqDPLiW5zHaxYJGTO4OokMjIlrCtf+VpEL+cXKtCvg723iguPYI5oaUNdS+/V7OU2gvXVWEg=="],
 
-    "@gramio/callback-data": ["@gramio/callback-data@0.0.8", "", {}, "sha512-Yy/SUSan9PLLHCDYo8W7XKn1pKsyM9DfVCoo9JAuGeEYKh6+35Qxt0xJeLsvHd0ldTvSnBM+bELmeIxeKHEFdA=="],
+    "@gramio/callback-data": ["@gramio/callback-data@0.0.11", "", {}, "sha512-EKjFcsGpm4t12d2ee6EYuYGvgd3bdRFkuQTMdvkVD+F4ZlS/31unsuq35nTa2T2qOvDY3fChq93QxEcOq24mRw=="],
 
     "@gramio/contexts": ["@gramio/contexts@0.2.5", "", { "peerDependencies": { "@gramio/types": "^9.0.0", "inspectable": "^3.0.1" } }, "sha512-Pl7jvcyM1nhMo8Ud5aSM6Sl8E1xXxj2n7NI43FI3yK0N375c49fzw2E5fQ8bCLwbVGOzMwFsh985gv79AgLADg=="],
 

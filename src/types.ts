@@ -55,6 +55,8 @@ export type PaginationSelectCallbackDataFunction<
 	payload: Payload extends CallbackData<any, any>
 		? InferDataUnpack<Payload>
 		: undefined;
+	offset: number;
+	limit: number;
 }) => string;
 
 export type WrapKeyboardFunction<

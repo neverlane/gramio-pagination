@@ -187,12 +187,124 @@ export class Pagination<
 		};
 	}
 
+	async getKeyboardWithData(
+		offset = 0,
+		...args: IsNever<Payload> extends true
+			? []
+			: [payload: InferDataUnpack<Payload>]
+	): Promise<{
+		keyboard: InlineKeyboard;
+		data: Data[];
+		pagination:
+			| {
+					totalPages: number;
+					currentPage: number;
+					hasNext: boolean;
+					hasPrevious: boolean;
+			  }
+			| {
+					hasNext: boolean;
+					hasPrevious: boolean;
+			  };
+	}> {
+		const { data, pagination } = await this.getDataWithPaginationInfo(
+			offset,
+			...args,
+		);
+
+		const keyboard = new InlineKeyboard({
+			enableSetterKeyboardHelpers: true,
+		})
+			.columns(this.columnsValue)
+			.add(
+				...data.map((x) => {
+					const item = this.itemDataIterator?.(x);
+
+					return InlineKeyboard.text(
+						// @ts-expect-error
+						item?.title ?? x.title,
+						this.selectCallbackDataFunction?.({
+							// @ts-expect-error
+							id: item?.id ?? x.id,
+							payload: args[0] as never,
+						}) ??
+							this.callbackData.pack({
+								type: "select",
+								// @ts-expect-error
+								offset: item?.id ?? x.id,
+								payload: args[0] as never,
+							}),
+					);
+				}),
+			)
+			.row()
+			.columns(undefined)
+			.addIf(
+				this.firstLastPage && pagination.hasPrevious,
+				InlineKeyboard.text(
+					"⏮️",
+					this.callbackData.pack({
+						type: "set_page",
+						offset: 0,
+						payload: args[0] as never,
+					}),
+				),
+			)
+			.addIf(
+				pagination.hasPrevious,
+				InlineKeyboard.text(
+					"⬅️",
+					this.callbackData.pack({
+						type: "set",
+						offset: offset - this.limitValue,
+						payload: args[0] as never,
+					}),
+				),
+			)
+			.addIf(
+				"totalPages" in pagination && !!this.pageInfoFormat,
+				InlineKeyboard.text(
+					// biome-ignore lint/style/noNonNullAssertion: <explanation>
+					this.pageInfoFormat!(pagination as PaginationPageInfo),
+					"$noop$",
+				),
+			)
+			.addIf(
+				pagination.hasNext,
+				InlineKeyboard.text(
+					"➡️",
+					this.callbackData.pack({
+						type: "set",
+						offset: offset + this.limitValue,
+						payload: args[0] as never,
+					}),
+				),
+			)
+			.addIf(
+				this.firstLastPage && "totalPages" in pagination && pagination.hasNext,
+				InlineKeyboard.text(
+					"⏭️",
+					this.callbackData.pack({
+						type: "set_page",
+						offset: (pagination as PaginationPageInfo).totalPages - 1,
+						payload: args[0] as never,
+					}),
+				),
+			);
+
+		return {
+			keyboard: this.wrapKeyboardHandler?.(keyboard) ?? keyboard,
+			data,
+			pagination,
+		};
+	}
+
 	async getKeyboard(
 		offset = 0,
 		...args: IsNever<Payload> extends true
 			? []
 			: [payload: InferDataUnpack<Payload>]
-	) {
+	): Promise<InlineKeyboard> {
 		const { data, pagination } = await this.getDataWithPaginationInfo(
 			offset,
 			...args,

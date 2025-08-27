@@ -12,6 +12,7 @@ import type {
 	PaginationOnSelectFunction,
 	PaginationPageInfo,
 	PaginationSelectCallbackDataFunction,
+	WrapKeyboardFunction,
 } from "./types.ts";
 import { calculatePagination } from "./utils.ts";
 
@@ -33,9 +34,7 @@ export class Pagination<
 	private pageInfoFormat: ((data: PaginationPageInfo) => string) | undefined;
 	private firstLastPage = false;
 
-	private wrapKeyboardHandler:
-		| ((keyboard: InlineKeyboard) => InlineKeyboard)
-		| undefined;
+	private wrapKeyboardHandler: WrapKeyboardFunction<Data, Payload> | undefined;
 
 	private callbackData: CallbackData<
 		{
@@ -94,7 +93,7 @@ export class Pagination<
 		return this as any;
 	}
 
-	wrapKeyboard(func: (keyboard: InlineKeyboard) => InlineKeyboard) {
+	wrapKeyboard(func: WrapKeyboardFunction<Data, Payload>) {
 		this.wrapKeyboardHandler = func;
 
 		return this;
@@ -293,7 +292,15 @@ export class Pagination<
 			);
 
 		return {
-			keyboard: this.wrapKeyboardHandler?.(keyboard) ?? keyboard,
+			keyboard:
+				this.wrapKeyboardHandler?.({
+					keyboard,
+					pagination,
+					offset,
+					limit: this.limitValue,
+					data,
+					payload: args[0] as never,
+				}) ?? keyboard,
 			data,
 			pagination,
 		};
@@ -390,6 +397,15 @@ export class Pagination<
 				),
 			);
 
-		return this.wrapKeyboardHandler?.(keyboard) ?? keyboard;
+		return (
+			this.wrapKeyboardHandler?.({
+				keyboard,
+				pagination,
+				offset,
+				limit: this.limitValue,
+				data,
+				payload: args[0] as never,
+			}) ?? keyboard
+		);
 	}
 }

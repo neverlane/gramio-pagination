@@ -1,5 +1,5 @@
 import type { CallbackData, InferDataUnpack } from "@gramio/callback-data";
-import type { Bot, ContextType } from "gramio";
+import type { Bot, ContextType, InlineKeyboard } from "gramio";
 
 export interface PaginationDataInput<
 	Payload extends CallbackData<any, any> | never = never,
@@ -56,3 +56,20 @@ export type PaginationSelectCallbackDataFunction<
 		? InferDataUnpack<Payload>
 		: undefined;
 }) => string;
+
+export type WrapKeyboardFunction<
+	Data,
+	Payload extends CallbackData<any, any> | never = never,
+> = (data: {
+	keyboard: InlineKeyboard;
+	pagination: {
+		hasNext: boolean;
+		hasPrevious: boolean;
+	};
+	offset: number;
+	limit: number;
+	data: Data[];
+	payload: Payload extends CallbackData<any, any>
+		? InferDataUnpack<Payload>
+		: undefined;
+}) => InlineKeyboard;

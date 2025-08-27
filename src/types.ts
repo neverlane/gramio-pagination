@@ -46,3 +46,13 @@ export interface PaginationPageInfo {
 }
 
 export type IsNever<T> = [T] extends [never] ? true : false;
+
+export type PaginationSelectCallbackDataFunction<
+	Data,
+	Payload extends CallbackData<any, any> | never = never,
+> = (data: {
+	id: string | number;
+	payload: Payload extends CallbackData<any, any>
+		? InferDataUnpack<Payload>
+		: undefined;
+}) => string;

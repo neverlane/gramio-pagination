@@ -11,6 +11,7 @@ import type {
 	PaginationItemFunction,
 	PaginationOnSelectFunction,
 	PaginationPageInfo,
+	PaginationSelectCallbackDataFunction,
 } from "./types.ts";
 import { calculatePagination } from "./utils.ts";
 
@@ -48,6 +49,10 @@ export class Pagination<
 			payload?: InferDataUnpack<Payload>;
 		}
 	>;
+
+	private selectCallbackDataFunction:
+		| PaginationSelectCallbackDataFunction<Data, Payload>
+		| undefined;
 
 	private payloadInstance: Payload | undefined;
 
@@ -125,6 +130,14 @@ export class Pagination<
 		return this;
 	}
 
+	selectCallbackData(
+		callback: PaginationSelectCallbackDataFunction<Data, Payload>,
+	) {
+		this.selectCallbackDataFunction = callback;
+
+		return this;
+	}
+
 	withPageInfo(format: (data: PaginationPageInfo) => string) {
 		this.pageInfoFormat = format;
 
@@ -196,12 +209,17 @@ export class Pagination<
 					return InlineKeyboard.text(
 						// @ts-expect-error
 						item?.title ?? x.title,
-						this.callbackData.pack({
-							type: "select",
+						this.selectCallbackDataFunction?.({
 							// @ts-expect-error
-							offset: item?.id ?? x.id,
+							id: item?.id ?? x.id,
 							payload: args[0] as never,
-						}),
+						}) ??
+							this.callbackData.pack({
+								type: "select",
+								// @ts-expect-error
+								offset: item?.id ?? x.id,
+								payload: args[0] as never,
+							}),
 					);
 				}),
 			)

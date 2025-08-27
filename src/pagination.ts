@@ -226,6 +226,8 @@ export class Pagination<
 							// @ts-expect-error
 							id: item?.id ?? x.id,
 							payload: args[0] as never,
+							offset,
+							limit: this.limitValue,
 						}) ??
 							this.callbackData.pack({
 								type: "select",

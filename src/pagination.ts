@@ -30,7 +30,7 @@ export class Pagination<
 	private onSelectCallback:
 		| PaginationOnSelectFunction<Data, Payload>
 		| undefined;
-	private getCount: PaginationGetCountFunction | undefined;
+	private getCount: PaginationGetCountFunction<Payload> | undefined;
 	private pageInfoFormat: ((data: PaginationPageInfo) => string) | undefined;
 	private firstLastPage = false;
 
@@ -172,7 +172,7 @@ export class Pagination<
 		}
 
 		const [count, data] = await Promise.all([
-			this.getCount(),
+			this.getCount(args[0] as never),
 			this.getData({
 				offset,
 				limit: this.limitValue,

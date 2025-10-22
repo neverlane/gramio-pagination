@@ -38,7 +38,13 @@ export type PaginationOnSelectFunction<
 	Payload extends CallbackData<any, any> | never = never,
 > = (data: PaginationOnSelectInput<Payload>) => void;
 
-export type PaginationGetCountFunction = () => Promise<number>;
+export type PaginationGetCountFunction<
+	Payload extends CallbackData<any, any> | never = never,
+>  = (payload: 
+	Payload extends CallbackData<any, any>
+		? InferDataUnpack<Payload>
+		: undefined
+) => Promise<number>;
 
 export interface PaginationPageInfo {
 	totalPages: number;
